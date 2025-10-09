@@ -7,9 +7,10 @@ import com.example.real_time_task_management.data.remote.api.ServiceApi
 import com.example.real_time_task_management.dto.responsedto.PagedResponse
 import com.example.real_time_task_management.dto.responsedto.ProjectResponseDTO
 import javax.inject.Inject
+import javax.inject.Named
 
-class ProjectPagingSource @Inject constructor(
-    private val serviceApi: ServiceApi,
+class ProjectPagingSource (
+     private val serviceApi: ServiceApi,
 ) : PagingSource<Int, ProjectResponseDTO>() {
 
     override fun getRefreshKey(state: PagingState<Int, ProjectResponseDTO>): Int? {
@@ -27,7 +28,7 @@ class ProjectPagingSource @Inject constructor(
                 size = params.loadSize
             )
             val projects: List<ProjectResponseDTO> = response.content
-            val nextKey = if (projects.isNotEmpty()) null else currentPage + 1
+            val nextKey = if (currentPage +1 >= response.totalPages) null else currentPage + 1
             val prevKey = if (currentPage == 0) null else currentPage - 1
             Log.d("PagingSource", "projects class: ${projects.firstOrNull()?.javaClass}")
             LoadResult.Page(

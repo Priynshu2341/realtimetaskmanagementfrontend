@@ -7,8 +7,11 @@ sealed class Screens(val route: String) {
     object LoginScreen : Screens("login_screen")
     object SignUpScreen : Screens("signup_screen")
     object ProjectsScreen : Screens("home_screen")
-    object TaskScreen : Screens("task_screen/{id}"){
+    object TaskScreen : Screens("task_screen/{id}") {
         fun createRoute(id: Long) = "task_screen/$id"
     }
+
+    object AddProjectScreen : Screens("add_project_screen")
+
 
 }

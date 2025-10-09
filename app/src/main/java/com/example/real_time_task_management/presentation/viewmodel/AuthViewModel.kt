@@ -1,6 +1,7 @@
 package com.example.real_time_task_management.presentation.viewmodel
 
 import android.content.Context
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.compose.runtime.getValue
@@ -23,15 +24,18 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val repository: AuthRepository,
-    private val userPrefs: UserPrefs,
+    val userPrefs: UserPrefs,
 ) : ViewModel() {
-
+    val userRole = runBlocking {userPrefs.getUser()?.user?.userRole.toString()}
     val isLoggedIn: Flow<Boolean> = userPrefs.isLoggedIn
+
+
     fun register(req: RegisterReqDTO, context: Context, navController: NavController) {
         viewModelScope.launch {
             try {
@@ -59,6 +63,8 @@ class AuthViewModel @Inject constructor(
                 userPrefs.changeLoginStatus(true)
                 Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
                 navController.navigate(Screens.ProjectsScreen.route)
+                userPrefs.saveUser(loginResponse.value!!)
+                Log.d("TAG", "login: ${loginResponse.value}")
             } catch (e: Exception) {
                 _loginResponse.value = null
                 Toast.makeText(context, "Login Failed ${e.message}", Toast.LENGTH_SHORT).show()

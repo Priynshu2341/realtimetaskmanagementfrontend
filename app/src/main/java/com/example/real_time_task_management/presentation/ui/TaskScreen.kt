@@ -24,6 +24,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.filter
 import com.example.real_time_task_management.dto.responsedto.ProjectResponseDTO
 import com.example.real_time_task_management.dto.responsedto.TaskResponseDTO
+import com.example.real_time_task_management.presentation.comms.CommentsBottomSheet
 import com.example.real_time_task_management.presentation.comms.TaskCard
 import com.example.real_time_task_management.presentation.viewmodel.ServiceViewModel
 import kotlinx.coroutines.flow.map
@@ -37,6 +38,7 @@ fun TaskScreen(
 ) {
     var selectedFilter by remember { mutableStateOf("All") }
 
+
     val taskPaged = remember(selectedFilter) {
         viewModel.getTaskPaged(projectId).map { pagingData ->
             pagingData.filter { task ->
@@ -49,6 +51,7 @@ fun TaskScreen(
             }
         }
     }.collectAsLazyPagingItems()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -104,14 +107,13 @@ fun TaskScreen(
                 ) { index ->
                     val task = taskPaged[index]
                     task?.let {
-                        TaskCard(task)
+                        TaskCard(task,task.id)
                     }
                 }
             }
         }
     }
 }
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -195,7 +197,7 @@ fun TaskScreenPreview() {
                 contentPadding = PaddingValues(vertical = 8.dp)
             ) {
                 items(fakeProjects.size) { index ->
-                    TaskCard(fakeProjects[index])
+                    TaskCard(fakeProjects[index], taskId = 1)
                 }
             }
         }

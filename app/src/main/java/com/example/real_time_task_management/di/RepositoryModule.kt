@@ -13,6 +13,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import jakarta.inject.Named
 import jakarta.inject.Singleton
 
 @Module
@@ -28,13 +29,13 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideAuthRepository(api: AuthApi): AuthRepository {
+    fun provideAuthRepository(@Named("AuthApi") api: AuthApi): AuthRepository {
         return AuthRepositoryImp(api)
     }
 
     @Provides
     @Singleton
-    fun provideServiceRepository(api: ServiceApi): ServiceRepository {
+    fun provideServiceRepository(@Named("ServiceApi") api: ServiceApi): ServiceRepository {
         return ServiceRepositoryImp(api)
     }
 

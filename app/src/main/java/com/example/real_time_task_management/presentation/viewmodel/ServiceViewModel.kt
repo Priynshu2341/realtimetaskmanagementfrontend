@@ -1,15 +1,21 @@
 package com.example.real_time_task_management.presentation.viewmodel
 
+import android.content.Context
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.example.real_time_task_management.domain.repository.ServiceRepository
+import com.example.real_time_task_management.dto.requestdto.ProjectReqDTO
+import com.example.real_time_task_management.dto.responsedto.CommentResponseDTO
 import com.example.real_time_task_management.dto.responsedto.ProjectResponseDTO
 import com.example.real_time_task_management.dto.responsedto.TaskResponseDTO
+import com.example.real_time_task_management.navigation.Screens
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,12 +45,18 @@ class ServiceViewModel @Inject constructor(
             }
         }
     }
+
     val projectsPaged: Flow<PagingData<ProjectResponseDTO>> =
         serviceRepository.getPagedProject().cachedIn(viewModelScope)
 
     fun getTaskPaged(projectId: Long): Flow<PagingData<TaskResponseDTO>> {
         return serviceRepository.getPagedTaskByProjectId(projectId).cachedIn(viewModelScope)
     }
+
+    fun getCommentsPaged(taskId: Long): Flow<PagingData<CommentResponseDTO>> {
+        return serviceRepository.getCommentsById(taskId).cachedIn(viewModelScope)
+    }
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun formatDate(dateString: String?): String? {
@@ -58,5 +70,32 @@ class ServiceViewModel @Inject constructor(
         }
     }
 
+    fun createProject(project: ProjectReqDTO, context: Context, navController: NavController) {
+        viewModelScope.launch {
+            try {
+                serviceRepository.createProject(project)
+                Log.d("response", "createProject: $project")
+                Toast.makeText(context, "Project Created", Toast.LENGTH_SHORT).show()
+                navController.navigate(Screens.ProjectsScreen.route)
+            } catch (e: Exception) {
+                Log.d("error", "createProject: ${e.message}")
+                Toast.makeText(context, "Project creation Failed ${e.message}", Toast.LENGTH_SHORT)
+                    .show()
+
+            }
+        }
+    }
+
+    fun addMemberToProject(projectId: Long, username: String, context: Context) {
+        viewModelScope.launch {
+            serviceRepository.addMemberToProject(projectId, username, context = context)
+        }
+    }
+
+    fun deleteProjectById(projectId: Long, context: Context) {
+        viewModelScope.launch {
+            serviceRepository.deleteProjectById(projectId, context = context)
+        }
+    }
 
 }

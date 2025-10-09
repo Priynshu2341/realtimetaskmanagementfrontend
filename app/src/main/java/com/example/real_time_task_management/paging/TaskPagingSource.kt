@@ -6,8 +6,9 @@ import com.example.real_time_task_management.data.remote.api.ServiceApi
 import com.example.real_time_task_management.dto.responsedto.PagedResponse
 import com.example.real_time_task_management.dto.responsedto.TaskResponseDTO
 import javax.inject.Inject
+import javax.inject.Named
 
-class TaskPagingSource @Inject constructor(
+class TaskPagingSource(
     private val api: ServiceApi,
     private val projectId: Long,
 ) : PagingSource<Int, TaskResponseDTO>() {
