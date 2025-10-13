@@ -8,18 +8,23 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.example.real_time_task_management.dto.requestdto.CommentReqDTO
 import com.example.real_time_task_management.dto.responsedto.CommentResponseDTO
+import com.example.real_time_task_management.presentation.viewmodel.AuthViewModel
 import com.example.real_time_task_management.presentation.viewmodel.ServiceViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -28,10 +33,14 @@ fun CommentsBottomSheet(
     state: SheetState,
     onDismiss: () -> Unit,
     taskId: Long,
+    navController: NavController,
 ) {
     val viewModel: ServiceViewModel = hiltViewModel()
     val coroutineScope = rememberCoroutineScope()
     var commentText by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val authViewmodel: AuthViewModel = hiltViewModel()
+    val username = runBlocking { authViewmodel.userPrefs.getUser()?.user?.username ?: "" }
 
     val comments = viewModel.getCommentsPaged(taskId).collectAsLazyPagingItems()
     // Dummy comments for now
@@ -116,7 +125,13 @@ fun CommentsBottomSheet(
                 TextButton(
                     onClick = {
                         if (commentText.isNotBlank()) {
-//                            comments.add(commentText)
+                            viewModel.createCommentByID(
+                                taskId, CommentReqDTO(
+                                    content = commentText,
+                                    username = username
+                                ), context = context, navController = navController
+                            )
+                            comments.refresh()
                             commentText = ""
                         }
                     }

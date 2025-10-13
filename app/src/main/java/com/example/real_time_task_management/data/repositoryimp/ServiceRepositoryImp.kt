@@ -3,6 +3,7 @@ package com.example.real_time_task_management.data.repositoryimp
 import android.content.Context
 import android.net.http.HttpException
 import android.widget.Toast
+import androidx.navigation.NavController
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -10,11 +11,14 @@ import androidx.paging.cachedIn
 import com.example.real_time_task_management.data.remote.api.ServiceApi
 
 import com.example.real_time_task_management.domain.repository.ServiceRepository
+import com.example.real_time_task_management.dto.requestdto.CommentReqDTO
 import com.example.real_time_task_management.dto.requestdto.ProjectReqDTO
+import com.example.real_time_task_management.dto.requestdto.TaskReqDTO
 import com.example.real_time_task_management.dto.responsedto.CommentResponseDTO
 
 import com.example.real_time_task_management.dto.responsedto.ProjectResponseDTO
 import com.example.real_time_task_management.dto.responsedto.TaskResponseDTO
+import com.example.real_time_task_management.navigation.Screens
 import com.example.real_time_task_management.paging.CommentsPagingSource
 import com.example.real_time_task_management.paging.ProjectPagingSource
 import com.example.real_time_task_management.paging.TaskPagingSource
@@ -75,7 +79,7 @@ class ServiceRepositoryImp @Inject constructor(
         }
     }
 
-    override  fun getCommentsById(taskId: Long): Flow<PagingData<CommentResponseDTO>> {
+    override fun getCommentsById(taskId: Long): Flow<PagingData<CommentResponseDTO>> {
         return Pager(
             config = PagingConfig(
                 pageSize = 10,
@@ -84,6 +88,66 @@ class ServiceRepositoryImp @Inject constructor(
             pagingSourceFactory = { CommentsPagingSource(serviceApi, taskId) }
         ).flow
 
+    }
+
+    override suspend fun createTaskById(
+        projectId: Long,
+        task: TaskReqDTO,
+        context: Context,
+        navController: NavController,
+    ) {
+        try {
+            serviceApi.addTaskById(projectId, task)
+            Toast.makeText(context, "Task created successfully", Toast.LENGTH_SHORT).show()
+            navController.navigate(Screens.TaskScreen.createRoute(projectId))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(context, "Failed to create task", Toast.LENGTH_SHORT).show()
+        }
+
+    }
+
+    override suspend fun addCommentById(
+        taskId: Long,
+        comment: CommentReqDTO,
+        context: Context,
+        navController: NavController,
+    ) {
+        try {
+            serviceApi.addCommentById(taskId, comment)
+            Toast.makeText(context, "Comment added successfully", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(context, "Failed to add comment", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override suspend fun updateTaskStatus(
+        taskId: Long,
+        context: Context,
+        status: String,
+    ) {
+        try {
+            serviceApi.updateTaskStatus(taskId, status)
+            Toast.makeText(context, "Task status updated successfully", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(context, "Failed to update task status", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override suspend fun updateTaskPriority(
+        taskId: Long,
+        context: Context,
+        priority: String,
+    ) {
+        try {
+            serviceApi.updateTaskPriority(taskId, priority)
+            Toast.makeText(context, "Task priority updated successfully", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(context, "Failed to update task priority", Toast.LENGTH_SHORT).show()
+        }
     }
 
 

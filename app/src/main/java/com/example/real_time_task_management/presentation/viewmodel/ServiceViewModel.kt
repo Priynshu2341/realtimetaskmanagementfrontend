@@ -11,7 +11,9 @@ import androidx.navigation.NavController
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.example.real_time_task_management.domain.repository.ServiceRepository
+import com.example.real_time_task_management.dto.requestdto.CommentReqDTO
 import com.example.real_time_task_management.dto.requestdto.ProjectReqDTO
+import com.example.real_time_task_management.dto.requestdto.TaskReqDTO
 import com.example.real_time_task_management.dto.responsedto.CommentResponseDTO
 import com.example.real_time_task_management.dto.responsedto.ProjectResponseDTO
 import com.example.real_time_task_management.dto.responsedto.TaskResponseDTO
@@ -98,4 +100,37 @@ class ServiceViewModel @Inject constructor(
         }
     }
 
+    fun createTaskById(
+        projectId: Long,
+        task: TaskReqDTO,
+        context: Context,
+        navController: NavController,
+    ) {
+        viewModelScope.launch {
+            serviceRepository.createTaskById(projectId, task, context = context, navController)
+        }
+    }
+
+    fun createCommentByID(
+        taskId: Long,
+        comment: CommentReqDTO,
+        context: Context,
+        navController: NavController,
+    ) {
+        viewModelScope.launch {
+            serviceRepository.addCommentById(taskId, comment, context, navController)
+        }
+    }
+
+    fun updateTaskStatus(taskId: Long, status: String, context: Context) {
+        viewModelScope.launch {
+            serviceRepository.updateTaskStatus(taskId, context, status)
+        }
+    }
+
+    fun updateTaskPriority(taskId: Long, priority: String, context: Context) {
+        viewModelScope.launch {
+            serviceRepository.updateTaskPriority(taskId, context, priority)
+        }
+    }
 }

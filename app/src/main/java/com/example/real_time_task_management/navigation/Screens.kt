@@ -12,6 +12,9 @@ sealed class Screens(val route: String) {
     }
 
     object AddProjectScreen : Screens("add_project_screen")
+    object AddTaskScreen : Screens("add_task_screen/{id}"){
+        fun createRoute(id: Long) = "add_task_screen/$id"
+    }
 
 
 }

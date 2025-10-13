@@ -5,6 +5,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Room
 import androidx.compose.material3.*
@@ -24,10 +25,13 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.filter
 import com.example.real_time_task_management.dto.responsedto.ProjectResponseDTO
 import com.example.real_time_task_management.dto.responsedto.TaskResponseDTO
+import com.example.real_time_task_management.navigation.Screens
 import com.example.real_time_task_management.presentation.comms.CommentsBottomSheet
 import com.example.real_time_task_management.presentation.comms.TaskCard
+import com.example.real_time_task_management.presentation.viewmodel.AuthViewModel
 import com.example.real_time_task_management.presentation.viewmodel.ServiceViewModel
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,7 +42,8 @@ fun TaskScreen(
 ) {
     var selectedFilter by remember { mutableStateOf("All") }
 
-
+    val authViewModel: AuthViewModel = hiltViewModel()
+    val userRole = runBlocking { authViewModel.userPrefs.getUser()?.user?.userRole ?: "" }
     val taskPaged = remember(selectedFilter) {
         viewModel.getTaskPaged(projectId).map { pagingData ->
             pagingData.filter { task ->
@@ -62,6 +67,18 @@ fun TaskScreen(
                     }
                 }
             )
+        }, floatingActionButton = {
+            if (userRole == "ADMIN") {
+                FloatingActionButton(
+                    onClick = {
+                        navController.navigate(Screens.AddTaskScreen.createRoute(id = projectId))
+                    },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = Color.White
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Task")
+                }
+            }
         }
     ) { paddingValues ->
         Column(
@@ -107,7 +124,7 @@ fun TaskScreen(
                 ) { index ->
                     val task = taskPaged[index]
                     task?.let {
-                        TaskCard(task,task.id)
+                        TaskCard(task, task.id,navController)
                     }
                 }
             }
@@ -197,7 +214,7 @@ fun TaskScreenPreview() {
                 contentPadding = PaddingValues(vertical = 8.dp)
             ) {
                 items(fakeProjects.size) { index ->
-                    TaskCard(fakeProjects[index], taskId = 1)
+                    TaskCard(fakeProjects[index], taskId = 1,navController)
                 }
             }
         }

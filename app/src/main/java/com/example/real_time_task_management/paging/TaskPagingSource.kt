@@ -31,7 +31,7 @@ class TaskPagingSource(
             )
             val projects: List<TaskResponseDTO> = response.content
             val prevKey = if (currentPage == 0) null else currentPage - 1
-            val nextKey = if (projects.isNotEmpty()) currentPage + 1 else null
+            val nextKey = if (currentPage +1 >= response.totalPages) null else currentPage + 1
             LoadResult.Page(
                 data = projects,
                 prevKey = prevKey,

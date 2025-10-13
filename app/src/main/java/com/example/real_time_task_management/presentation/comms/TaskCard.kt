@@ -1,47 +1,41 @@
 package com.example.real_time_task_management.presentation.comms
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Room
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.real_time_task_management.dto.responsedto.TaskResponseDTO
+import com.example.real_time_task_management.presentation.viewmodel.AuthViewModel
 import com.example.real_time_task_management.presentation.viewmodel.ServiceViewModel
+import kotlinx.coroutines.runBlocking
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaskCard(project: TaskResponseDTO,taskId: Long) {
-
+fun TaskCard(
+    project: TaskResponseDTO,
+    taskId: Long,
+    navController: NavController,
+) {
+    val authViewModel: AuthViewModel = hiltViewModel()
     val viewModel: ServiceViewModel = hiltViewModel()
     val bottomAppBarState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val context = LocalContext.current
+
     var showCommentSheet by remember { mutableStateOf(false) }
+    var statusExpanded by remember { mutableStateOf(false) }
+    var priorityExpanded by remember { mutableStateOf(false) }
+    val userRole = runBlocking { authViewModel.userPrefs.getUser()?.user?.userRole ?: "" }
 
     Card(
         modifier = Modifier
@@ -55,6 +49,7 @@ fun TaskCard(project: TaskResponseDTO,taskId: Long) {
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
@@ -73,17 +68,21 @@ fun TaskCard(project: TaskResponseDTO,taskId: Long) {
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
+
             Spacer(modifier = Modifier.height(8.dp))
+
+
             Text(
                 text = project.description,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
                 color = Color.DarkGray,
                 lineHeight = 20.sp,
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(12.dp))
+
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth(),
@@ -101,8 +100,41 @@ fun TaskCard(project: TaskResponseDTO,taskId: Long) {
                         color = Color.Black,
                         fontSize = 13.sp
                     )
-                }
+                    if (userRole == "ADMIN") {
+                        Box {
+                            TextButton(onClick = { priorityExpanded = !priorityExpanded }) {
+                                Text(text = "Change Priority")
+                            }
 
+                            DropdownMenu(
+                                expanded = priorityExpanded,
+                                onDismissRequest = { priorityExpanded = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("LOW") },
+                                    onClick = {
+                                        viewModel.updateTaskPriority(taskId, "LOW", context)
+                                        priorityExpanded = false
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("MEDIUM") },
+                                    onClick = {
+                                        viewModel.updateTaskPriority(taskId, "MEDIUM", context)
+                                        priorityExpanded = false
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("HIGH") },
+                                    onClick = {
+                                        viewModel.updateTaskPriority(taskId, "HIGH", context)
+                                        priorityExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
                         text = "Status:",
@@ -115,6 +147,34 @@ fun TaskCard(project: TaskResponseDTO,taskId: Long) {
                         color = Color.Black,
                         fontSize = 13.sp
                     )
+
+                    if (userRole == "ADMIN") {
+                        Box {
+                            TextButton(onClick = { statusExpanded = !statusExpanded }) {
+                                Text(text = "Change Status")
+                            }
+
+                            DropdownMenu(
+                                expanded = statusExpanded,
+                                onDismissRequest = { statusExpanded = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("DONE") },
+                                    onClick = {
+                                        viewModel.updateTaskStatus(taskId, "DONE", context)
+                                        statusExpanded = false
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("TODO") },
+                                    onClick = {
+                                        viewModel.updateTaskStatus(taskId, "TODO", context)
+                                        statusExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
             }
 
@@ -125,9 +185,9 @@ fun TaskCard(project: TaskResponseDTO,taskId: Long) {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column() {
+                Column {
                     Text(
-                        text = "CreatedBy: ${project.assignee}",
+                        text = "Created By: ${project.assignee}",
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Medium
@@ -136,6 +196,7 @@ fun TaskCard(project: TaskResponseDTO,taskId: Long) {
                         Icon(Icons.Default.Chat, contentDescription = "Comments")
                     }
                 }
+
                 Text(
                     text = "#${project.id}",
                     fontSize = 14.sp,
@@ -144,11 +205,13 @@ fun TaskCard(project: TaskResponseDTO,taskId: Long) {
                 )
             }
             if (showCommentSheet) {
-                CommentsBottomSheet(state = bottomAppBarState, onDismiss = {
-                    showCommentSheet = false
-                }, taskId = taskId )
+                CommentsBottomSheet(
+                    state = bottomAppBarState,
+                    onDismiss = { showCommentSheet = false },
+                    taskId = taskId,
+                    navController = navController
+                )
             }
-
         }
     }
 }

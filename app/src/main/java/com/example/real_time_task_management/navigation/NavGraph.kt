@@ -14,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.real_time_task_management.presentation.ui.AddProjectScreen
+import com.example.real_time_task_management.presentation.ui.AddTaskScreen
 import com.example.real_time_task_management.presentation.ui.LoginScreen
 import com.example.real_time_task_management.presentation.ui.ProjectScreen
 import com.example.real_time_task_management.presentation.ui.SignUpScreen
@@ -76,6 +77,13 @@ fun NavGraph(navController: NavHostController) {
             AddProjectScreen(navController, authViewModel.userPrefs)
         }
 
+        composable(
+            route = Screens.AddTaskScreen.route,
+            arguments = listOf(navArgument("id") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getLong("id") ?: 0
+            AddTaskScreen(navController, authViewModel.userPrefs, id)
+        }
     }
 
 }

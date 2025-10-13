@@ -1,5 +1,6 @@
 package com.example.real_time_task_management.presentation.ui
 
+import com.example.real_time_task_management.dto.requestdto.TaskReqDTO
 import android.widget.Toast
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
@@ -40,12 +41,12 @@ import kotlinx.coroutines.runBlocking
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddProjectScreen(navController: NavController, userPrefs: UserPrefs){
+fun AddTaskScreen(navController: NavController, userPrefs: UserPrefs, id: Long) {
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    val viewModel : ServiceViewModel = hiltViewModel()
+    val viewModel: ServiceViewModel = hiltViewModel()
 
 
     Scaffold(
@@ -53,7 +54,7 @@ fun AddProjectScreen(navController: NavController, userPrefs: UserPrefs){
             TopAppBar(
                 title = {
                     Text(
-                        text = "Add Project",
+                        text = "Add Task",
                         modifier = Modifier.padding(start = 20.dp),
                         fontSize = 30.sp,
                         fontWeight = FontWeight.Bold
@@ -67,16 +68,24 @@ fun AddProjectScreen(navController: NavController, userPrefs: UserPrefs){
                 actions = {
                     IconButton(onClick = {
                         if (title.isNotEmpty() && description.isNotEmpty()) {
-                            val project = ProjectReqDTO(
+                            val task = TaskReqDTO(
                                 title = title,
                                 description = description,
                                 username = runBlocking { userPrefs.getUser()?.user?.username ?: "" }
                             )
-                            viewModel.createProject(project,context,navController)
-                        }else
-                            Toast.makeText(context,"Please enter title and description",Toast.LENGTH_SHORT).show()
+                            viewModel.createTaskById(id, task, context, navController)
+                        } else
+                            Toast.makeText(
+                                context,
+                                "Please enter title and description",
+                                Toast.LENGTH_SHORT
+                            ).show()
                     }) {
-                        Icon(Icons.Default.Done, contentDescription = "Done", modifier = Modifier.size(40.dp))
+                        Icon(
+                            Icons.Default.Done,
+                            contentDescription = "Done",
+                            modifier = Modifier.size(40.dp)
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

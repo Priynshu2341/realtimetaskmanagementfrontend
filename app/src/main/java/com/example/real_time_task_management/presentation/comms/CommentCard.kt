@@ -24,6 +24,7 @@ import com.example.real_time_task_management.ui.theme.RealTImeTaskManagementThem
 
 @Composable
 fun CommentCard(comment: CommentResponseDTO) {
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
